@@ -1,0 +1,246 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 300 25% 98%;
+    --foreground: 322 35% 25%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 322 35% 25%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 322 35% 25%;
+
+    --primary: 322 35% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 300 15% 95%;
+    --secondary-foreground: 322 35% 40%;
+
+    --muted: 300 15% 95%;
+    --muted-foreground: 322 15% 45%;
+
+    --accent: 300 25% 90%;
+    --accent-foreground: 322 35% 35%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 300 20% 85%;
+    --input: 300 20% 85%;
+    --ring: 322 35% 55%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 322 35% 25%;
+    --sidebar-primary: 322 35% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 300 25% 90%;
+    --sidebar-accent-foreground: 322 35% 35%;
+    --sidebar-border: 300 20% 85%;
+    --sidebar-ring: 322 35% 55%;
+  }
+
+  .dark {
+    --background: 322 35% 12%;
+    --foreground: 300 10% 90%;
+
+    --card: 322 35% 14%;
+    --card-foreground: 300 10% 90%;
+
+    --popover: 322 35% 14%;
+    --popover-foreground: 300 10% 90%;
+
+    --primary: 322 35% 65%;
+    --primary-foreground: 322 35% 12%;
+
+    --secondary: 322 35% 20%;
+    --secondary-foreground: 300 10% 90%;
+
+    --muted: 322 35% 20%;
+    --muted-foreground: 300 10% 70%;
+
+    --accent: 322 35% 25%;
+    --accent-foreground: 300 10% 90%;
+
+    --destructive: 0 74% 42%;
+    --destructive-foreground: 300 10% 90%;
+
+    --border: 322 35% 25%;
+    --input: 322 35% 25%;
+    --ring: 322 35% 65%;
+
+    --sidebar-background: 322 35% 14%;
+    --sidebar-foreground: 300 10% 90%;
+    --sidebar-primary: 322 35% 65%;
+    --sidebar-primary-foreground: 322 35% 12%;
+    --sidebar-accent: 322 35% 25%;
+    --sidebar-accent-foreground: 300 10% 90%;
+    --sidebar-border: 322 35% 25%;
+    --sidebar-ring: 322 35% 65%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  .nuptial-card {
+    @apply bg-card text-card-foreground shadow-sm hover:shadow-md transition-shadow duration-300 rounded-lg overflow-hidden;
+  }
+
+  .nuptial-gradient {
+    @apply bg-gradient-to-br from-wedding-100 to-wedding-200 dark:from-wedding-900 dark:to-wedding-800;
+  }
+
+  .pill-active {
+    @apply bg-primary text-primary-foreground;
+  }
+
+  .pill-pending {
+    @apply bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-200;
+  }
+
+  .pill-danger {
+    @apply bg-destructive/15 text-destructive dark:bg-destructive/30;
+  }
+
+  .pill-success {
+    @apply bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200;
+  }
+
+  .pill {
+    @apply px-2 py-0.5 rounded-full text-xs font-medium inline-flex items-center gap-1;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  .animate-pulse-soft {
+    animation: pulseSoft 2s infinite;
+  }
+
+  .hover-scale {
+    @apply transition-transform duration-200;
+  }
+
+  .hover-scale:hover {
+    @apply scale-105;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-md;
+  }
+
+  .responsive-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4;
+  }
+
+  .responsive-padding {
+    @apply px-4 sm:px-6 md:px-8;
+  }
+
+  .responsive-text {
+    @apply text-sm sm:text-base md:text-lg;
+  }
+
+  .responsive-heading {
+    @apply text-xl sm:text-2xl md:text-3xl font-bold;
+  }
+
+  .dialog-content-responsive {
+    @apply p-4 sm:p-6;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes pulseSoft {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .hide-on-mobile {
+      display: none;
+    }
+
+    .mobile-full-width {
+      width: 100%;
+    }
+
+    .mobile-stack {
+      flex-direction: column;
+    }
+
+    .mobile-center {
+      text-align: center;
+      display: flex;
+      justify-content: center;
+    }
+  }
+}
+
+@layer utilities {
+  .gradient-primary {
+    @apply bg-gradient-to-r from-primary/20 to-transparent;
+  }
+
+  .gradient-card {
+    @apply bg-gradient-to-br from-white to-secondary/50 dark:from-card dark:to-accent;
+  }
+
+  .card-header-gradient {
+    @apply bg-gradient-to-r from-primary/20 via-primary/10 to-transparent;
+  }
+
+  .text-responsive {
+    @apply text-sm sm:text-base lg:text-lg;
+  }
+
+  .heading-responsive {
+    @apply text-xl sm:text-2xl lg:text-3xl;
+  }
+
+  .p-responsive {
+    @apply p-3 sm:p-4 lg:p-6;
+  }
+
+  .m-responsive {
+    @apply m-2 sm:m-4 lg:m-6;
+  }
+
+  .gap-responsive {
+    @apply gap-2 sm:gap-4 lg:gap-6;
+  }
+
+  .shadow-card {
+    @apply shadow-sm hover:shadow-md transition-all duration-300;
+  }
+
+  .signature-canvas {
+    @apply border rounded-md bg-white touch-none;
+  }
+}
