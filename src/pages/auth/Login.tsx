@@ -23,13 +23,8 @@ const formSchema = z.object({
 });
 
 const Login = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { toast } = useToast();
   const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-
-  const from = location.state?.from?.pathname || '/';
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -41,22 +36,8 @@ const Login = () => {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-
-    setTimeout(() => {
-      const success = login(values.email, values.password);
-
-      if (success) {
-        navigate(from, { replace: true });
-      } else {
-        toast({
-          title: 'Erro ao fazer login',
-          description: 'Email ou senha incorretos',
-          variant: 'destructive',
-        });
-      }
-
-      setIsLoading(false);
-    }, 500);
+    login(values.email, values.password);
+    setIsLoading(false);
   }
 
   return (
@@ -94,7 +75,7 @@ const Login = () => {
                   <FormControl>
                     <div className="relative">
                       <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                      <Input type="password" {...field} className="pl-10" />
+                      <Input type="password" placeholder="********" {...field} className="pl-10" />
                     </div>
                   </FormControl>
                   <FormMessage />
