@@ -1,22 +1,16 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-
-interface User {
-  name: string;
-  email: string;
-  password?: string;
-  company?: string;
-  [key: string]: string | undefined;
-}
+import api from '@/config/api';
+import { CreateUserDTO } from '@/types/user';
+import { postRegister } from '@/services/auth/postRegister';
+import { postAuth } from '@/services/auth/postAuth';
 
 interface AuthContextType {
-  user: User | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => void;
   register: (userData: CreateUserDTO) => void;
   logout: () => void;
-  updateUser: (userData: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -26,7 +20,6 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
@@ -50,93 +43,57 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     await login(userData.email, userData.password);
   };
 
-  const login = (email: string, password: string): boolean => {
-    const users: User[] = JSON.parse(localStorage.getItem('users') || '[]');
-    const foundUser = users.find((user) => user.email === email && user.password === password);
-
-    if (foundUser) {
-      const { password: _, ...userWithoutPassword } = foundUser;
-
-      setUser(userWithoutPassword);
+  const login = async (email: string, password: string) => {
+    try {
+      const handleLogin = await postAuth({ email, password });
+      localStorage.setItem('auth_token', handleLogin.access_token);
+      updateToken(handleLogin.access_token);
       setIsAuthenticated(true);
-
-      localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('currentUser', JSON.stringify(userWithoutPassword));
-
+      navigate('/');
+    } catch (error) {
       toast({
-        title: 'Login bem-sucedido',
-        description: `Bem-vindo de volta, ${foundUser.name}!`,
+        title: 'Erro no login',
+        description: 'Email ou senha incorretos.',
+        variant: 'destructive',
       });
-
-      return true;
+      console.error('Erro ao fazer login:', error);
+      throw error;
     }
-
-    return false;
   };
 
-  const register = (userData: User): boolean => {
-    const users: User[] = JSON.parse(localStorage.getItem('users') || '[]');
+  function updateToken(token?: string) {
+    api.defaults.headers.common.Authorization = token ? `Bearer ${token}` : undefined;
+  }
 
-    if (users.some((user) => user.email === userData.email)) {
-      return false;
+  useEffect(() => {
+    const token = localStorage.getItem('auth_token');
+
+    if (token) {
+      updateToken(token);
+      setIsAuthenticated(true);
+    } else {
+      setIsAuthenticated(false);
     }
 
-    users.push(userData);
-    localStorage.setItem('users', JSON.stringify(users));
-
-    const { password: _, ...userWithoutPassword } = userData;
-
-    setUser(userWithoutPassword);
-    setIsAuthenticated(true);
-
-    localStorage.setItem('isAuthenticated', 'true');
-    localStorage.setItem('currentUser', JSON.stringify(userWithoutPassword));
-
-    toast({
-      title: 'Registro bem-sucedido',
-      description: `Bem-vindo, ${userData.name}!`,
-    });
-
-    return true;
-  };
+    setIsLoading(false);
+  }, []);
 
   const logout = () => {
-    setUser(null);
-    setIsAuthenticated(false);
-
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('currentUser');
-
-    toast({
-      title: 'Logout realizado',
-      description: 'Você foi desconectado com sucesso.',
-    });
-
+    updateToken(undefined);
+    localStorage.clear();
     navigate('/login');
   };
 
-  const updateUser = (userData: Partial<User>) => {
-    if (!user) return;
+  useEffect(() => {
+    const subscribe = api.registerInterceptTokenManager(logout);
 
-    const updatedUser = { ...user, ...userData };
-    setUser(updatedUser);
-
-    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-
-    const users: User[] = JSON.parse(localStorage.getItem('users') || '[]');
-    const updatedUsers = users.map((u) =>
-      u.email === updatedUser.email ? { ...u, ...userData } : u
-    );
-    localStorage.setItem('users', JSON.stringify(updatedUsers));
-
-    toast({
-      title: 'Perfil atualizado',
-      description: 'Suas informações foram atualizadas com sucesso.',
-    });
-  };
+    return () => {
+      subscribe();
+    };
+  }, [logout]);
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, login, register, logout, updateUser }}>
+    <AuthContext.Provider value={{ isAuthenticated, register, login, logout }}>
       {!isLoading && children}
     </AuthContext.Provider>
   );
