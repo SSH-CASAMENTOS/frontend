@@ -29,6 +29,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     if (profileSelected && profileSelected.id) {
       const weddings = await getWeddingsByProfileId(profileSelected.id);
       setAvailableWeddings(weddings);
+      
       if (!activeWedding && weddings.length > 0) {
         setActiveWedding(weddings[0]);
       }
