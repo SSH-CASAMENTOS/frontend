@@ -43,7 +43,7 @@ export const useDashboard = () => {
 
   useEffect(() => {
     loadEvents();
-  }, [loadEvents]);
+  }, []);
 
   useEffect(() => {
     const handleEventCreated = () => {
