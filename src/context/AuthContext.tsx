@@ -1,16 +1,28 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, Dispatch } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 import { useToast } from '@/hooks/use-toast';
 import api from '@/config/api';
-import { CreateUserDTO } from '@/types/user';
-import { postRegister } from '@/services/auth/postRegister';
+import { Profile } from '@/types';
+import { CreateUserDTO, User } from '@/types/user';
 import { postAuth } from '@/services/auth/postAuth';
+import { getUserById } from '@/services/users/getUserById';
+import { postRegister } from '@/services/auth/postRegister';
+import { getProfilesByUserId } from '@/services/profiles/getProfilesByUserId';
 
 interface AuthContextType {
-  isAuthenticated: boolean;
-  login: (email: string, password: string) => void;
   register: (userData: CreateUserDTO) => void;
+  login: (email: string, password: string) => void;
+  isAuthenticated: boolean;
   logout: () => void;
+  profiles: Profile[] | undefined;
+  profileSelected: Profile | undefined;
+  setProfileSelected: Dispatch<React.SetStateAction<Profile | undefined>>;
+}
+
+interface JwtPayload {
+  sub: string;
+  email: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,10 +32,13 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const navigate = useNavigate();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<User>();
+  const [profiles, setProfiles] = useState<Profile[]>();
+  const [profileSelected, setProfileSelected] = useState<Profile>();
 
   const register = async (userData: CreateUserDTO) => {
     const handleCreateUser = await postRegister(userData);
@@ -47,6 +62,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       const handleLogin = await postAuth({ email, password });
       localStorage.setItem('auth_token', handleLogin.access_token);
+      getUserIdFromToken(handleLogin.access_token);
       updateToken(handleLogin.access_token);
       setIsAuthenticated(true);
       navigate('/');
@@ -61,6 +77,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
+  async function getUserIdFromToken(token: string) {
+    try {
+      const decoded = jwtDecode<JwtPayload>(token);
+      const user = await getUserById(decoded.sub);
+      setUser(user);
+    } catch (error) {
+      console.error('Erro ao decodificar o token:', error);
+      throw error;
+    }
+  }
+
   function updateToken(token?: string) {
     api.defaults.headers.common.Authorization = token ? `Bearer ${token}` : undefined;
   }
@@ -70,6 +97,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     if (token) {
       updateToken(token);
+      getUserIdFromToken(token);
       setIsAuthenticated(true);
     } else {
       setIsAuthenticated(false);
@@ -77,6 +105,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     setIsLoading(false);
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    const handleGetProfiles = async () => {
+      const profiles = await getProfilesByUserId(user.id);
+      setProfiles(profiles);
+      setProfileSelected(profiles[0]);
+    };
+
+    handleGetProfiles();
+  }, [user]);
 
   const logout = () => {
     updateToken(undefined);
@@ -93,7 +132,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, [logout]);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, register, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        register,
+        login,
+        isAuthenticated,
+        logout,
+        profiles,
+        profileSelected,
+        setProfileSelected,
+      }}
+    >
       {!isLoading && children}
     </AuthContext.Provider>
   );

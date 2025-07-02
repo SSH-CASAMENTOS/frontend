@@ -14,18 +14,20 @@ import { Button } from '@/components/ui/button';
 import { useAppContext } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
+import { Profile } from '@/types';
 
 export const Topbar: React.FC = () => {
   const { activeWedding, setActiveWedding, availableWeddings, isNavOpen } = useAppContext();
-  const { user, logout } = useAuth();
+  const { profileSelected, profiles, logout } = useAuth();
   const navigate = useNavigate();
 
-  const getInitials = () => {
-    if (!user || !user.name) return 'U';
-
-    const nameParts = user.name.split(' ');
-    if (nameParts.length === 1) return nameParts[0][0].toUpperCase();
-    return (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase();
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((part) => part[0])
+      .slice(0, 2)
+      .join('')
+      .toUpperCase();
   };
 
   const handleLogout = () => {
@@ -123,14 +125,56 @@ export const Topbar: React.FC = () => {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="gap-2 bg-gradient-to-r from-primary/5 to-transparent"
+              >
+                {profileSelected ? (
+                  <span className="truncate max-w-[120px]">{profileSelected.name}</span>
+                ) : (
+                  <span>Selecione um profile</span>
+                )}
+                <ChevronDown size={16} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end" forceMount>
+              {profiles &&
+                profiles.length > 0 &&
+                profiles.map((profile: Profile) => (
+                  <DropdownMenuItem
+                    key={profile.id}
+                    disabled={profile.id === profileSelected?.id}
+                    onClick={() => {
+                      // Handle profile selection logic here
+                    }}
+                  >
+                    <Avatar className="h-9 w-9">
+                      <AvatarFallback>{getInitials(profile.name)}</AvatarFallback>
+                    </Avatar>
+                    <span className="ml-2">{profile.name}</span>
+                  </DropdownMenuItem>
+                ))}
+              <hr className='my-2' />
+              <DropdownMenuItem
+                onClick={() => {
+                  // Handle profile selection logic here
+                }}
+              >
+                <span className="text-center w-full">Adicionar Perfil</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                 <Avatar className="h-9 w-9 bg-primary/10">
-                  <AvatarFallback className="text-primary">{getInitials()}</AvatarFallback>
+                  <AvatarFallback className="text-primary">MC</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>{user?.name || 'Minha Conta'}</DropdownMenuLabel>
+              <DropdownMenuLabel>{'Minha Conta'}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <Link to="/profile" className="block w-full">
                 <DropdownMenuItem className="cursor-pointer">
