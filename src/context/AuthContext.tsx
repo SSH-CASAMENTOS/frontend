@@ -13,8 +13,8 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => boolean;
-  register: (userData: User) => boolean;
+  login: (email: string, password: string) => void;
+  register: (userData: CreateUserDTO) => void;
   logout: () => void;
   updateUser: (userData: Partial<User>) => void;
 }
@@ -32,27 +32,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  useEffect(() => {
-    const initializeAuth = () => {
-      const storedAuth = localStorage.getItem('isAuthenticated') === 'true';
-      const storedUser = localStorage.getItem('currentUser');
+  const register = async (userData: CreateUserDTO) => {
+    const handleCreateUser = await postRegister(userData);
+    if (!handleCreateUser.id) {
+      return toast({
+        title: 'Erro no cadastro',
+        description: 'Ocorreu um erro ao registrar sua conta.',
+        variant: 'destructive',
+      });
+    }
+    toast({
+      title: 'Usuário cadastrado!',
+      description: 'O usuário foi cadastrado com sucesso.',
+      variant: 'default',
+    });
 
-      if (storedAuth && storedUser) {
-        try {
-          setUser(JSON.parse(storedUser));
-          setIsAuthenticated(true);
-        } catch (error) {
-          console.error('Error parsing user data from localStorage:', error);
-          localStorage.removeItem('isAuthenticated');
-          localStorage.removeItem('currentUser');
-        }
-      }
-
-      setIsLoading(false);
-    };
-
-    initializeAuth();
-  }, []);
+    await login(userData.email, userData.password);
+  };
 
   const login = (email: string, password: string): boolean => {
     const users: User[] = JSON.parse(localStorage.getItem('users') || '[]');

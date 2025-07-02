@@ -15,15 +15,23 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useToast } from '@/hooks/use-toast';
 
 const registerFormSchema = z
   .object({
     name: z.string().min(3, 'O nome deve ter pelo menos 3 caracteres'),
     email: z.string().email('Email inválido'),
-    password: z.string().min(6, 'A senha deve ter pelo menos 6 caracteres'),
+    password: z
+      .string()
+      .min(6, 'A senha deve ter pelo menos 6 caracteres')
+      .refine(
+        (val) =>
+          /[a-z]/.test(val) && /[A-Z]/.test(val) && /[0-9]/.test(val) && /[^a-zA-Z0-9]/.test(val),
+        {
+          message:
+            'A senha deve conter pelo menos uma letra minúscula, uma maiúscula, um número e um símbolo.',
+        }
+      ),
     confirmPassword: z.string(),
-    company: z.string().min(2, 'Nome da empresa deve ter pelo menos 2 caracteres'),
     terms: z.boolean().refine((val) => val === true, {
       message: 'Você deve aceitar os termos',
     }),
@@ -37,8 +45,6 @@ type RegisterFormValues = z.infer<typeof registerFormSchema>;
 
 const Register = () => {
   const { register } = useAuth();
-  const navigate = useNavigate();
-  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<RegisterFormValues>({
@@ -48,7 +54,6 @@ const Register = () => {
       email: '',
       password: '',
       confirmPassword: '',
-      company: '',
       terms: false,
     },
   });
@@ -56,32 +61,13 @@ const Register = () => {
   const onSubmit = async (values: RegisterFormValues) => {
     setIsSubmitting(true);
 
-    try {
-      const success = register({
-        name: values.name,
-        email: values.email,
-        password: values.password,
-        company: values.company,
-      });
+    register({
+      name: values.name,
+      email: values.email,
+      password: values.password,
+    });
 
-      if (success) {
-        navigate('/');
-      } else {
-        toast({
-          title: 'Erro no cadastro',
-          description: 'Este email já está cadastrado',
-          variant: 'destructive',
-        });
-      }
-    } catch (error) {
-      toast({
-        title: 'Erro no cadastro',
-        description: 'Ocorreu um erro ao registrar sua conta',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    setIsSubmitting(false);
   };
 
   return (
@@ -116,20 +102,6 @@ const Register = () => {
                   <FormLabel>Email</FormLabel>
                   <FormControl>
                     <Input type="email" placeholder="email@exemplo.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="company"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Empresa</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Nome da sua empresa" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
