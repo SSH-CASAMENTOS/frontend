@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAppContext } from '@/context/AppContext';
 import { Wedding, Event, Payment } from '@/types';
-import { getDashboardStats, getEventsByWeddingId, getPaymentsByWeddingId } from '@/data/mockData';
+import { getDashboardStats, getPaymentsByWeddingId } from '@/data/mockData';
+import { getEventsByWeddingId } from '@/services/events/getEventsByWeddingId';
 import { addDays } from 'date-fns';
 import { useEventEmitter } from '@/patterns/observer/EventEmitter';
 
@@ -24,12 +25,11 @@ export const useDashboard = () => {
     { name: 'Outros', value: 2, color: '#6B7280' },
   ];
 
-  const loadEvents = useCallback(() => {
+  const loadEvents = useCallback(async () => {
     if (activeWedding) {
-      const events = getEventsByWeddingId(activeWedding.id).filter(
-        (event) => event.start > today && event.start < addDays(today, 30)
-      );
-      setUpcomingEvents(events);
+      const events = await getEventsByWeddingId(activeWedding.id);
+      const eventsFiltered = events.filter((event) => event.start > today && event.start < addDays(today, 30));
+      setUpcomingEvents(eventsFiltered);
 
       const payments = getPaymentsByWeddingId(activeWedding.id).filter(
         (payment) => payment.status === 'pending'
