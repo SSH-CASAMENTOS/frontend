@@ -45,48 +45,6 @@ export const Topbar: React.FC = () => {
         ></div>
 
         <div className="flex items-center space-x-4">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="icon" className="relative">
-                <Bell size={20} />
-                <span className="absolute top-0 right-0 w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80" align="end">
-              <div className="space-y-2">
-                <h3 className="font-medium mb-2 pb-2 border-b">Notificações</h3>
-                <ul className="space-y-2">
-                  <li className="p-3 rounded-md hover:bg-muted transition-colors border border-border/50">
-                    <div className="flex items-start gap-2">
-                      <div className="bg-amber-100 dark:bg-amber-900 p-2 rounded-full">
-                        <CreditCard className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">Pagamento pendente</p>
-                        <p className="text-xs text-muted-foreground">
-                          Ana e Pedro - Pagamento final do buffet vence em 7 dias
-                        </p>
-                      </div>
-                    </div>
-                  </li>
-                  <li className="p-3 rounded-md hover:bg-muted transition-colors border border-border/50">
-                    <div className="flex items-start gap-2">
-                      <div className="bg-primary/10 p-2 rounded-full">
-                        <Calendar className="h-4 w-4 text-primary" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">Reunião agendada</p>
-                        <p className="text-xs text-muted-foreground">
-                          Reunião com o Buffet Gourmet em 5 dias
-                        </p>
-                      </div>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-            </PopoverContent>
-          </Popover>
-
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button

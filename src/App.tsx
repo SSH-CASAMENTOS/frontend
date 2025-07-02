@@ -6,7 +6,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import { AuthProvider } from './context/AuthContext';
 import { AppShell } from './components/layout/AppShell';
-import { NotificationProvider } from './components/notifications/NotificationProvider';
 import Dashboard from './pages/Dashboard';
 import Budget from './pages/Budget';
 import Contracts from './pages/Contracts';
@@ -33,32 +32,30 @@ const App = () => {
         <BrowserRouter>
           <AuthProvider>
             <AppProvider>
-              <NotificationProvider>
-                <Routes>
-                  {/* Public Routes */}
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/register" element={<Register />} />
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
 
-                  {/* Protected Routes */}
-                  <Route element={<ProtectedRoute />}>
-                    <Route element={<AppShell />}>
-                      <Route path="/" element={<Dashboard />} />
-                      <Route path="/budget" element={<Budget />} />
-                      <Route path="/contracts" element={<Contracts />} />
-                      <Route path="/items" element={<Items />} />
-                      <Route path="/payments" element={<Payments />} />
-                      <Route path="/calendar" element={<Calendar />} />
-                      <Route path="/profile" element={<Profile />} />
-                      <Route path="/signature" element={<Signature />} />
-                      <Route path="/add-wedding" element={<AddWedding />} />
-                    </Route>
+                {/* Protected Routes */}
+                <Route element={<ProtectedRoute />}>
+                  <Route element={<AppShell />}>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/budget" element={<Budget />} />
+                    <Route path="/contracts" element={<Contracts />} />
+                    <Route path="/items" element={<Items />} />
+                    <Route path="/payments" element={<Payments />} />
+                    <Route path="/calendar" element={<Calendar />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/signature" element={<Signature />} />
+                    <Route path="/add-wedding" element={<AddWedding />} />
                   </Route>
+                </Route>
 
-                  {/* Fallback Routes */}
-                  <Route path="/404" element={<NotFound />} />
-                  <Route path="*" element={<Navigate to="/404" replace />} />
-                </Routes>
-              </NotificationProvider>
+                {/* Fallback Routes */}
+                <Route path="/404" element={<NotFound />} />
+                <Route path="*" element={<Navigate to="/404" replace />} />
+              </Routes>
             </AppProvider>
           </AuthProvider>
         </BrowserRouter>

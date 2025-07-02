@@ -21,10 +21,11 @@ import { Calendar as CalendarIcon } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/context/AuthContext';
+import { postWedding } from '@/services/weddings/postWedding';
 
 const addWeddingSchema = z.object({
   title: z.string().min(3, 'O título deve ter pelo menos 3 caracteres'),
-  clientNames: z.string().min(3, 'Os nomes dos clientes são obrigatórios'),
   location: z.string().min(3, 'A localização é obrigatória'),
   budget: z.string().refine(
     (value) => {
@@ -45,42 +46,48 @@ type AddWeddingFormValues = z.infer<typeof addWeddingSchema>;
 const AddWedding: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { availableWeddings } = useAppContext();
+  const { profileSelected } = useAuth();
+  const { loadWeddings } = useAppContext();
 
   const form = useForm<AddWeddingFormValues>({
     resolver: zodResolver(addWeddingSchema),
     defaultValues: {
       title: '',
-      clientNames: '',
       location: '',
       budget: '',
       date: undefined,
     },
   });
 
-  const onSubmit = (values: AddWeddingFormValues) => {
+  const onSubmit = async (values: AddWeddingFormValues) => {
     const budgetValue = parseFloat(values.budget.replace(/[^0-9]/g, '')) / 100;
 
     const newWedding: Wedding = {
-      id: `wedding-${Date.now()}`,
       title: values.title,
-      clientNames: values.clientNames,
       location: values.location,
       budget: budgetValue,
+      profileId: profileSelected.id,
       totalPaid: 0,
       date: values.date,
       status: 'upcoming',
     };
 
-    const updatedWeddings = [...availableWeddings, newWedding];
-    localStorage.setItem('weddings', JSON.stringify(updatedWeddings));
-
-    toast({
-      title: 'Casamento adicionado',
-      description: `${values.title} foi criado com sucesso!`,
-    });
-
-    navigate('/');
+    try {
+      const created = await postWedding(newWedding);
+      loadWeddings();
+      toast({
+        title: 'Casamento adicionado',
+        description: `${values.title} foi criado com sucesso!`,
+      });
+      navigate('/');
+    } catch (error) {
+      console.error('Erro ao criar casamento:', error);
+      return toast({
+        title: 'Erro ao criar casamento',
+        description: 'Tente novamente.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const formatCurrency = (value: string) => {
@@ -119,23 +126,9 @@ const AddWedding: React.FC = () => {
 
             <FormField
               control={form.control}
-              name="clientNames"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nomes dos Clientes</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ana Silva e Pedro Oliveira" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name="date"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
+                <FormItem>
                   <FormLabel>Data do Casamento</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>

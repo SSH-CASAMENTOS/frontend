@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '@/context/AppContext';
 import { Payment } from '@/types';
-import { getPaymentsByWeddingId } from '@/data/mockData';
+import { getPayments } from '@/services/payments/getPayments';
 import { formatCurrency } from '@/lib/formatters';
 import {
   editPayment,
@@ -88,18 +88,18 @@ const PaymentsPage = () => {
 
   useEffect(() => {
     if (activeWedding) {
-      const weddingPayments = getPaymentsByWeddingId(activeWedding.id);
+      const handleGetWeddingPayments = async () => {
+        const weddingPayments = await getPayments();
+        const updatedPayments = weddingPayments.map((payment) => {
+          if (payment.status === 'pending' && isAfter(new Date(), new Date(payment.dueDate))) {
+            return { ...payment, status: 'overdue' as const };
+          }
+          return payment;
+        });
 
-      const today = new Date();
-
-      const updatedPayments = weddingPayments.map((payment) => {
-        if (payment.status === 'pending' && isAfter(today, new Date(payment.dueDate))) {
-          return { ...payment, status: 'overdue' as const };
-        }
-        return payment;
-      });
-
-      setPayments(updatedPayments);
+        setPayments(updatedPayments);
+      };
+      handleGetWeddingPayments();
     } else {
       setPayments([]);
     }

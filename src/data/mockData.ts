@@ -11,40 +11,40 @@ export const weddings: Wedding[] = [
     title: 'Casamento de Ana e Pedro',
     date: addDays(today, 60),
     location: 'Buffet Jardim Azul, São Paulo',
-    clientNames: 'Ana Silva & Pedro Santos',
     status: 'upcoming',
     budget: 85000,
     totalPaid: 40000,
+    profileId: "dij2oifg32124564362u2489g"
   },
   {
     id: 'w2',
     title: 'Casamento de Marina e João',
     date: addDays(today, 120),
     location: 'Fazenda Vista Linda, Campinas',
-    clientNames: 'Marina Oliveira & João Costa',
     status: 'upcoming',
     budget: 120000,
     totalPaid: 50000,
+    profileId: "dij2oifgu4135133532489g"
   },
   {
     id: 'w3',
     title: 'Casamento de Carla e Roberto',
     date: subDays(today, 30),
     location: 'Hotel Continental, Rio de Janeiro',
-    clientNames: 'Carla Mendes & Roberto Almeida',
     status: 'completed',
     budget: 95000,
     totalPaid: 95000,
+    profileId: "dij2oifgu248145331259g"
   },
   {
     id: 'w4',
     title: 'Casamento de Fernanda e Lucas',
     date: addDays(today, 180),
     location: 'Casa de Festas Belo Monte, Belo Horizonte',
-    clientNames: 'Fernanda Lima & Lucas Moreira',
     status: 'upcoming',
     budget: 75000,
     totalPaid: 25000,
+    profileId: "dij2oifgu212532662489g"
   },
 ];
 
@@ -601,26 +601,4 @@ export const getContractsByWeddingId = (weddingId: string): Contract[] =>
 export const getItemsByWeddingId = (weddingId: string): Item[] =>
   items.filter((item) => item.weddingId === weddingId);
 
-export const getPaymentsByWeddingId = (weddingId: string): Payment[] =>
-  payments.filter((payment) => payment.weddingId === weddingId);
 
-export const getEventsByWeddingId = (weddingId: string): Event[] =>
-  events.filter((event) => event.weddingId === weddingId);
-
-export const getDashboardStats = () => {
-  const upcomingWeddings = weddings.filter((w) => w.status === 'upcoming').length;
-  const totalBudget = weddings.reduce((sum, wedding) => sum + wedding.budget, 0);
-  const totalPaid = weddings.reduce((sum, wedding) => sum + wedding.totalPaid, 0);
-  const pendingPayments = payments.filter((p) => p.status === 'pending').length;
-  const upcomingEvents = events.filter(
-    (e) => e.start > today && e.start < addDays(today, 30)
-  ).length;
-
-  return {
-    upcomingWeddings,
-    totalBudget,
-    totalPaid,
-    pendingPayments,
-    upcomingEvents,
-  };
-};

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Wedding, ModuleType } from '@/types';
-import { weddings as defaultWeddings } from '@/data/mockData';
+import { getWeddingsByProfileId } from '@/services/weddings/getWeddingsByProfileId';
+import { useAuth } from './AuthContext';
 
 interface AppContextType {
   activeWedding: Wedding | null;
@@ -10,43 +11,33 @@ interface AppContextType {
   isNavOpen: boolean;
   setIsNavOpen: (isOpen: boolean) => void;
   availableWeddings: Wedding[];
-  addWedding: (wedding: Wedding) => void;
   updateWedding: (wedding: Wedding) => void;
   deleteWedding: (id: string) => void;
+  loadWeddings: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-  const getInitialWeddings = (): Wedding[] => {
-    const storedWeddings = localStorage.getItem('weddings');
-    if (storedWeddings) {
-      try {
-        const parsed = JSON.parse(storedWeddings) as Wedding[];
-        return parsed.map((wedding) => ({
-          ...wedding,
-          date: new Date(wedding.date),
-        }));
-      } catch (error) {
-        console.error('Failed to parse weddings from localStorage:', error);
-        return defaultWeddings;
-      }
-    }
-    return defaultWeddings;
-  };
-
-  const [availableWeddings, setAvailableWeddings] = useState<Wedding[]>(getInitialWeddings);
+  const { profileSelected } = useAuth();
+  const [availableWeddings, setAvailableWeddings] = useState<Wedding[]>([]);
   const [activeWedding, setActiveWedding] = useState<Wedding | null>(availableWeddings[0] || null);
   const [activeModule, setActiveModule] = useState<ModuleType>('dashboard');
   const [isNavOpen, setIsNavOpen] = useState(true);
 
-  useEffect(() => {
-    localStorage.setItem('weddings', JSON.stringify(availableWeddings));
-  }, [availableWeddings]);
-
-  const addWedding = (wedding: Wedding) => {
-    setAvailableWeddings((prev) => [...prev, wedding]);
+  const loadWeddings = async () => {
+    if (profileSelected && profileSelected.id) {
+      const weddings = await getWeddingsByProfileId(profileSelected.id);
+      setAvailableWeddings(weddings);
+      if (!activeWedding && weddings.length > 0) {
+        setActiveWedding(weddings[0]);
+      }
+    }
   };
+
+  useEffect(() => {
+    loadWeddings();
+  }, [profileSelected]);
 
   const updateWedding = (updatedWedding: Wedding) => {
     setAvailableWeddings((prev) =>
@@ -77,9 +68,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         isNavOpen,
         setIsNavOpen,
         availableWeddings,
-        addWedding,
         updateWedding,
         deleteWedding,
+        loadWeddings,
       }}
     >
       {children}

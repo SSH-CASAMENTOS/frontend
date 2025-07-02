@@ -21,14 +21,14 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({
       <StatsCard
         title="Casamentos Ativos"
         value={upcomingWeddings}
+        description="Total de casamentos por vir"
         icon={Users}
-        trend={{ value: 10, isPositive: true }}
         className="bg-gradient-to-br from-wedding-100/50 to-wedding-200/30"
       />
       <StatsCard
         title="Pagamentos Pendentes"
         value={pendingPayments}
-        description={`Total: ${formatCurrency(pendingPaymentsAmount)}`}
+        description={`Total de orçamentos: ${formatCurrency(pendingPaymentsAmount)}`}
         icon={CreditCard}
         className="bg-gradient-to-br from-amber-100/50 to-amber-200/30 dark:from-amber-900/20 dark:to-amber-800/10"
       />

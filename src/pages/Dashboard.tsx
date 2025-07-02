@@ -3,10 +3,10 @@ import { DashboardStats } from '@/components/dashboard/DashboardStats';
 import { WeddingSection } from '@/components/dashboard/WeddingSection';
 import { EventsSection } from '@/components/dashboard/EventsSection';
 import { useDashboard } from '@/hooks/useDashboard';
-import { Calendar, Home, Heart } from 'lucide-react';
+import { Home } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { getCategoryIcon } from '@/lib/categoryIcons';
 import confetti from 'canvas-confetti';
+import { BudgetDistribution } from '@/components/dashboard/BudgetDistribution';
 
 const Dashboard = () => {
   const {
@@ -65,59 +65,23 @@ const Dashboard = () => {
 
       <motion.div variants={itemVariants}>
         <DashboardStats
-          upcomingWeddings={stats.upcomingWeddings}
-          pendingPayments={stats.pendingPayments}
-          pendingPaymentsAmount={stats.totalBudget - stats.totalPaid}
-          upcomingEvents={stats.upcomingEvents}
+          upcomingWeddings={stats.upcomingWeddings || 0}
+          pendingPayments={stats.pendingPayments || 0}
+          pendingPaymentsAmount={stats.totalBudget - stats.totalPaid || 0}
+          upcomingEvents={stats.upcomingEvents || 0}
         />
       </motion.div>
 
       <motion.div variants={itemVariants}>
-        <WeddingSection
-          weddings={availableWeddings}
-          activeWedding={activeWedding}
-          onSelectWedding={handleSelectWedding}
-        />
+        <WeddingSection weddings={availableWeddings} onSelectWedding={handleSelectWedding} />
       </motion.div>
 
-      <motion.div className="grid grid-cols-1 lg:grid-cols-3 gap-6" variants={itemVariants}>
-        <div className="lg:col-span-2">
-          <EventsSection events={upcomingEvents} budgetData={budgetDistributionData} />
-        </div>
+      <motion.div variants={itemVariants}>
+        <EventsSection events={upcomingEvents} />
+      </motion.div>
 
-        <div className="rounded-lg border bg-card shadow-sm overflow-hidden">
-          <div className="p-6 flex flex-col items-center justify-center h-full text-center space-y-3">
-            <div className="rounded-full bg-gradient-to-br from-primary/20 to-primary/5 p-4 mb-2">
-              <Calendar className="h-8 w-8 text-primary" />
-            </div>
-            <h3 className="text-xl font-medium">Próximos Eventos</h3>
-            <p className="text-muted-foreground text-sm">
-              Você tem {stats.upcomingEvents} eventos nos próximos 30 dias
-            </p>
-            {activeWedding ? (
-              <motion.div
-                className="flex flex-col items-center"
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.3 }}
-              >
-                <p className="text-xs text-muted-foreground max-w-xs mx-auto">
-                  Para o casamento "{activeWedding.title}"
-                </p>
-
-                <div className="mt-3 flex items-center justify-center gap-2">
-                  <Heart className="h-4 w-4 text-red-500" />
-                  <span className="text-sm font-medium">{activeWedding.clientNames}</span>
-                  <Heart className="h-4 w-4 text-red-500" />
-                </div>
-              </motion.div>
-            ) : (
-              <p className="text-xs text-muted-foreground max-w-xs mx-auto">
-                Selecione um casamento para ver eventos específicos
-              </p>
-            )}
-          </div>
-        </div>
+      <motion.div variants={itemVariants}>
+        <BudgetDistribution data={budgetDistributionData} />
       </motion.div>
     </motion.div>
   );

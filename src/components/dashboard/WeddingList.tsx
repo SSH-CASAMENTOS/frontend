@@ -47,7 +47,6 @@ export const WeddingList: React.FC<WeddingListProps> = ({ weddings, onSelectWedd
   const filteredWeddings = weddings.filter(
     (wedding) =>
       wedding.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      wedding.clientNames.toLowerCase().includes(searchTerm.toLowerCase()) ||
       wedding.location.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -88,7 +87,7 @@ export const WeddingList: React.FC<WeddingListProps> = ({ weddings, onSelectWedd
                 <div className="flex-grow min-w-0">
                   <h4 className="font-medium text-sm truncate">{wedding.title}</h4>
                   <p className="text-xs text-muted-foreground truncate">
-                    {wedding.clientNames} • {wedding.location}
+                    {wedding.location}
                   </p>
                 </div>
               </div>
