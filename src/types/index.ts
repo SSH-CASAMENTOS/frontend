@@ -1,3 +1,15 @@
+import { User } from "./user";
+
+export interface Profile {
+  id: string;
+  user: User;
+  userId: string;
+  name: string;
+  weddings: Wedding[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Wedding {
   id: string;
   title: string;
