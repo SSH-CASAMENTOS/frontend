@@ -1,18 +1,25 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAppContext } from '@/context/AppContext';
 import { Wedding, Event, Payment } from '@/types';
-import { getDashboardStats, getEventsByWeddingId, getPaymentsByWeddingId } from '@/data/mockData';
+import { getEventsByWeddingId } from '@/services/events/getEventsByWeddingId';
+import { getPayments } from '@/services/payments/getPayments';
 import { addDays } from 'date-fns';
 import { useEventEmitter } from '@/patterns/observer/EventEmitter';
 
+interface DashboardStats {
+  upcomingWeddings?: number;
+  totalBudget?: number;
+  totalPaid?: number;
+  pendingPayments?: number;
+  upcomingEvents?: number;
+}
+
 export const useDashboard = () => {
   const { availableWeddings, activeWedding, setActiveWedding } = useAppContext();
+  const [stats, setStats] = useState<DashboardStats>({});
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
-  const [pendingPayments, setPendingPayments] = useState<Payment[]>([]);
   const eventEmitter = useEventEmitter();
-
   const today = new Date();
-  const stats = getDashboardStats();
 
   const budgetDistributionData = [
     { name: 'Buffet', value: 35, color: '#8B5CF6' },
@@ -24,26 +31,43 @@ export const useDashboard = () => {
     { name: 'Outros', value: 2, color: '#6B7280' },
   ];
 
-  const loadEvents = useCallback(() => {
+  const loadEvents = useCallback(async () => {
     if (activeWedding) {
-      const events = getEventsByWeddingId(activeWedding.id).filter(
+      const events = await getEventsByWeddingId(activeWedding.id);
+      const eventsFiltered = events.filter(
         (event) => event.start > today && event.start < addDays(today, 30)
       );
-      setUpcomingEvents(events);
+      setUpcomingEvents(eventsFiltered);
 
-      const payments = getPaymentsByWeddingId(activeWedding.id).filter(
-        (payment) => payment.status === 'pending'
-      );
-      setPendingPayments(payments);
+      const payments = await getPayments();
+      const availableWeddingIds = availableWeddings.map((w) => w.id);
+
+      const upcomingWeddings = availableWeddings.filter((w) => w.status === 'upcoming').length;
+      const totalBudget = availableWeddings.reduce((sum, wedding) => sum + wedding.budget, 0);
+      const totalPaid = availableWeddings.reduce((sum, wedding) => sum + wedding.totalPaid, 0);
+      const pendingPayments = payments.filter(
+        (p) => p.status === 'pending' && availableWeddingIds.includes(p.weddingId)
+      ).length;
+      const upcomingEvents = events.filter(
+        (e) => e.start > today && e.start < addDays(today, 30)
+      ).length;
+
+      setStats({
+        upcomingWeddings,
+        totalBudget,
+        totalPaid,
+        pendingPayments,
+        upcomingEvents,
+      });
     } else {
+      setStats({});
       setUpcomingEvents([]);
-      setPendingPayments([]);
     }
-  }, [activeWedding, today]);
+  }, [activeWedding]);
 
   useEffect(() => {
     loadEvents();
-  }, []);
+  }, [activeWedding]);
 
   useEffect(() => {
     const handleEventCreated = () => {
@@ -77,7 +101,6 @@ export const useDashboard = () => {
   return {
     stats,
     upcomingEvents,
-    pendingPayments,
     budgetDistributionData,
     availableWeddings,
     activeWedding,

@@ -94,16 +94,16 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ events }) => {
   };
 
   return (
-    <Card className="h-full">
+    <Card className='h-full'>
       <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent">
         <CardTitle className="text-lg flex items-center gap-2">
           <Calendar className="h-4 w-4 text-primary" />
           Próximos Eventos
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4 overflow-auto max-h-[400px] pr-2 py-4">
+      <CardContent className="space-y-4 overflow-auto">
         {events.length === 0 ? (
-          <div className="text-muted-foreground text-center py-8 flex flex-col items-center justify-center">
+          <div className="my-10 text-muted-foreground text-center flex flex-col items-center justify-center">
             <Calendar className="h-12 w-12 text-muted-foreground/50 mb-2" />
             <p className="text-muted-foreground">Nenhum evento próximo</p>
             <p className="text-xs text-muted-foreground/70 mt-1">

@@ -11,14 +11,14 @@ export interface Profile {
 }
 
 export interface Wedding {
-  id: string;
+  id?: string;
   title: string;
   date: Date;
   location: string;
-  clientNames: string;
   status: 'upcoming' | 'completed' | 'canceled';
   budget: number;
   totalPaid: number;
+  profileId: string;
   coverImage?: string;
 }
 

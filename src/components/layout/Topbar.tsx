@@ -14,18 +14,20 @@ import { Button } from '@/components/ui/button';
 import { useAppContext } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
+import { Profile } from '@/types';
 
 export const Topbar: React.FC = () => {
   const { activeWedding, setActiveWedding, availableWeddings, isNavOpen } = useAppContext();
-  const { user, logout } = useAuth();
+  const { profileSelected, profiles, logout } = useAuth();
   const navigate = useNavigate();
 
-  const getInitials = () => {
-    if (!user || !user.name) return 'U';
-
-    const nameParts = user.name.split(' ');
-    if (nameParts.length === 1) return nameParts[0][0].toUpperCase();
-    return (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase();
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((part) => part[0])
+      .slice(0, 2)
+      .join('')
+      .toUpperCase();
   };
 
   const handleLogout = () => {
@@ -43,48 +45,6 @@ export const Topbar: React.FC = () => {
         ></div>
 
         <div className="flex items-center space-x-4">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="icon" className="relative">
-                <Bell size={20} />
-                <span className="absolute top-0 right-0 w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80" align="end">
-              <div className="space-y-2">
-                <h3 className="font-medium mb-2 pb-2 border-b">Notificações</h3>
-                <ul className="space-y-2">
-                  <li className="p-3 rounded-md hover:bg-muted transition-colors border border-border/50">
-                    <div className="flex items-start gap-2">
-                      <div className="bg-amber-100 dark:bg-amber-900 p-2 rounded-full">
-                        <CreditCard className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">Pagamento pendente</p>
-                        <p className="text-xs text-muted-foreground">
-                          Ana e Pedro - Pagamento final do buffet vence em 7 dias
-                        </p>
-                      </div>
-                    </div>
-                  </li>
-                  <li className="p-3 rounded-md hover:bg-muted transition-colors border border-border/50">
-                    <div className="flex items-start gap-2">
-                      <div className="bg-primary/10 p-2 rounded-full">
-                        <Calendar className="h-4 w-4 text-primary" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">Reunião agendada</p>
-                        <p className="text-xs text-muted-foreground">
-                          Reunião com o Buffet Gourmet em 5 dias
-                        </p>
-                      </div>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-            </PopoverContent>
-          </Popover>
-
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -123,14 +83,56 @@ export const Topbar: React.FC = () => {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="gap-2 bg-gradient-to-r from-primary/5 to-transparent"
+              >
+                {profileSelected ? (
+                  <span className="truncate max-w-[120px]">{profileSelected.name}</span>
+                ) : (
+                  <span>Selecione um profile</span>
+                )}
+                <ChevronDown size={16} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end" forceMount>
+              {profiles &&
+                profiles.length > 0 &&
+                profiles.map((profile: Profile) => (
+                  <DropdownMenuItem
+                    key={profile.id}
+                    disabled={profile.id === profileSelected?.id}
+                    onClick={() => {
+                      // Handle profile selection logic here
+                    }}
+                  >
+                    <Avatar className="h-9 w-9">
+                      <AvatarFallback>{getInitials(profile.name)}</AvatarFallback>
+                    </Avatar>
+                    <span className="ml-2">{profile.name}</span>
+                  </DropdownMenuItem>
+                ))}
+              <hr className='my-2' />
+              <DropdownMenuItem
+                onClick={() => {
+                  // Handle profile selection logic here
+                }}
+              >
+                <span className="text-center w-full">Adicionar Perfil</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                 <Avatar className="h-9 w-9 bg-primary/10">
-                  <AvatarFallback className="text-primary">{getInitials()}</AvatarFallback>
+                  <AvatarFallback className="text-primary">MC</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>{user?.name || 'Minha Conta'}</DropdownMenuLabel>
+              <DropdownMenuLabel>{'Minha Conta'}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <Link to="/profile" className="block w-full">
                 <DropdownMenuItem className="cursor-pointer">

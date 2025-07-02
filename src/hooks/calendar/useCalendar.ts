@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAppContext } from '@/context/AppContext';
 import { Event } from '@/types';
-import { getEventsByWeddingId } from '@/data/mockData';
+import { getEventsByWeddingId } from '@/services/events/getEventsByWeddingId';
 import { checkDayHasEvents, createDefaultFormData, EventDayObserver } from './calendarUtils';
 import { useEventHandlers } from './eventHandlers';
 import { EventFormData, UseCalendarReturn } from './types';
@@ -20,17 +20,19 @@ export const useCalendar = (): UseCalendarReturn => {
 
   useEffect(() => {
     if (activeWedding) {
-      const weddingEvents = getEventsByWeddingId(activeWedding.id);
+      const handleGetEventsByWeddingId = async () => {
+        const weddingEvents = await getEventsByWeddingId(activeWedding.id);
+        const formattedEvents = weddingEvents.map((event) => ({
+          ...event,
+          start: new Date(event.start),
+          end: new Date(event.end),
+        }));
 
-      const formattedEvents = weddingEvents.map((event) => ({
-        ...event,
-        start: new Date(event.start),
-        end: new Date(event.end),
-      }));
+        setEvents(formattedEvents);
 
-      setEvents(formattedEvents);
-
-      eventDayObserver.updateEvents(formattedEvents);
+        eventDayObserver.updateEvents(formattedEvents);
+      };
+      handleGetEventsByWeddingId();
     } else {
       setEvents([]);
       eventDayObserver.updateEvents([]);
